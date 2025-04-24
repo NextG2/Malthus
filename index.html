@@ -69,5 +69,86 @@
             populationChart.update();
         });
     </script>
+    <hr>
+<h2>🌍 Logistic 模型互动实验</h2>
+<p>模型：<strong>dN/dt = rN(1 - N/K)</strong></p>
+
+<div class="controls">
+    <label for="logisticR">增长率 r：</label>
+    <input type="range" id="logisticR" min="0.01" max="0.2" step="0.01" value="0.1">
+    <span id="rValue">0.10</span><br>
+
+    <label for="logisticN0">初始人口 N₀：</label>
+    <input type="range" id="logisticN0" min="100" max="10000" step="100" value="1000">
+    <span id="n0Value">1000</span><br>
+
+    <label for="logisticK">最大承载人口 K：</label>
+    <input type="range" id="logisticK" min="1000" max="50000" step="500" value="10000">
+    <span id="kValue">10000</span>
+</div>
+
+<canvas id="logisticChart" width="700" height="400"></canvas>
+
+<script>
+    const ctx2 = document.getElementById('logisticChart').getContext('2d');
+    const rSlider = document.getElementById('logisticR');
+    const n0Slider = document.getElementById('logisticN0');
+    const kSlider = document.getElementById('logisticK');
+    const rValue = document.getElementById('rValue');
+    const n0Value = document.getElementById('n0Value');
+    const kValue = document.getElementById('kValue');
+
+    function generateLogisticData(r, N0, K, years = 20, step = 1) {
+        let data = [], labels = [], N = N0;
+        for (let t = 0; t <= years; t += step) {
+            labels.push(t + "年");
+            data.push(N);
+            N += r * N * (1 - N / K);
+        }
+        return { labels, data };
+    }
+
+    let r = parseFloat(rSlider.value);
+    let N0 = parseFloat(n0Slider.value);
+    let K = parseFloat(kSlider.value);
+    let logisticData = generateLogisticData(r, N0, K);
+
+    const logisticChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: logisticData.labels,
+            datasets: [{
+                label: '人口数',
+                data: logisticData.data,
+                borderColor: 'green',
+                borderWidth: 2,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    function updateLogisticChart() {
+        r = parseFloat(rSlider.value);
+        N0 = parseFloat(n0Slider.value);
+        K = parseFloat(kSlider.value);
+        rValue.textContent = r.toFixed(2);
+        n0Value.textContent = N0;
+        kValue.textContent = K;
+        const newData = generateLogisticData(r, N0, K);
+        logisticChart.data.labels = newData.labels;
+        logisticChart.data.datasets[0].data = newData.data;
+        logisticChart.update();
+    }
+
+    rSlider.addEventListener('input', updateLogisticChart);
+    n0Slider.addEventListener('input', updateLogisticChart);
+    kSlider.addEventListener('input', updateLogisticChart);
+</script>
 </body>
 </html>
